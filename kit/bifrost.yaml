@@ -1,0 +1,44 @@
+# syntax=docker/sandbox-kit:3
+schemaVersion: "3"
+kind: mixin
+displayName: Bifrost gateway
+version: "1.2.0"
+description: Proxy-managed Bifrost virtual key for the local Claude demo.
+
+capabilities:
+  - type: com.docker.sandbox/network-policy@1
+    config:
+      runtime:
+        allow:
+          - host.docker.internal:8080
+          - localhost:8080
+
+  - type: com.docker.sandbox/credential@1
+    config:
+      service: bifrost
+      phase: runtime
+      apiKey:
+        name: BIFROST_VIRTUAL_KEY
+        proxyManaged: true
+        # The local proxy can normalize host.docker.internal to localhost.
+        inject:
+          - domain: localhost
+            header: x-bf-vk
+            format: "%s"
+          - domain: host.docker.internal
+            header: x-bf-vk
+            format: "%s"
+
+  - type: com.docker.sandbox/lifecycle@1
+    config:
+      startup:
+        - description: Configure Claude with the Bifrost credential placeholder
+          user: agent
+          env: [BIFROST_VIRTUAL_KEY, CLAUDE_CONFIG_DIR]
+          command: |
+            set -eu
+            : "${BIFROST_VIRTUAL_KEY:?Bifrost credential missing: check the host secret and binding}"
+            : "${CLAUDE_CONFIG_DIR:?Claude configuration directory is not set}"
+            mkdir -p "$CLAUDE_CONFIG_DIR"
+            umask 077
+            printf '{"env":{"ANTHROPIC_API_KEY":"local-placeholder","ANTHROPIC_AUTH_TOKEN":"","CLAUDE_CODE_OAUTH_TOKEN":"","ANTHROPIC_CUSTOM_HEADERS":"x-bf-vk: %s"}}\n' "$BIFROST_VIRTUAL_KEY" > "$CLAUDE_CONFIG_DIR/settings.json"

@@ -1,0 +1,20 @@
+schemaVersion: "1"
+name: claude-bifrost-localhost
+agent: sbx-kit-claude
+workspace: ./workspace
+
+kits:
+  - docker.io/docker/sbx-kit-claude:2.1.267
+  - ./kit
+
+env:
+  ANTHROPIC_BASE_URL: http://host.docker.internal:8080/anthropic
+  ANTHROPIC_MODEL: anthropic/claude-sonnet-4-5
+  CLAUDE_CONFIG_DIR: /home/agent/.claude-bifrost
+
+bindings:
+  bifrost:
+    apiKey:
+      domains:
+        - host.docker.internal
+        - localhost

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://www.getbifrost.ai/schema",
+  "version": 2,
+  "config_store": {
+    "enabled": true,
+    "type": "sqlite",
+    "config": {
+      "path": "/app/data/config.db"
+    }
+  },
+  "framework": {
+    "pricing": {
+      "pricing_url": "file:///app/data/pricing.json",
+      "pricing_sync_interval": 86400,
+      "model_parameters_url": "file:///app/data/model-parameters.json"
+    }
+  }
+}
